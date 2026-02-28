@@ -1,23 +1,33 @@
 import streamlit as st
-from recommend import df, recommend_movies
 import json
+import pandas as pd
 
-# ✅ LINE 2: FIRST Streamlit command (NO imports/calls before this!)
+# FIRST: set_page_config
 st.set_page_config(
-    page_title="Movie Recommender",
+    page_title="Movie Recommender", 
     page_icon="🎬",
     layout="wide"
 )
 
-# Load config AFTER set_page_config
-try:
-    with open("src/config.json", 'r') as f:
-        config = json.load(f)
-except FileNotFoundError:
-    config = {"top_n": 10}
+# Load df BEFORE any widgets
+@st.cache_data
+def load_data():
+    try:
+        from recommend import df, recommend_movies
+        return df, recommend_movies
+    except:
+        st.error("❌ Load recommend.py first!")
+        return pd.DataFrame(), lambda x: []
 
+df, recommend_movies = load_data()
+
+# Now widgets are safe
 st.title("🎬 Movie Recommendation System")
 st.markdown("---")
+
+if df.empty:
+    st.warning("📊 No data loaded. Check src/recommend.py")
+    st.stop()
 
 # Sidebar
 st.sidebar.header("📊 Dataset Info")
@@ -32,7 +42,7 @@ with col1:
     movies_list = df['title'].drop_duplicates().tolist()
     selected_movie = st.selectbox(
         "Choose a movie:",
-        options=movies_list[:1000],
+        options=movies_list[:1000] if movies_list else ["No movies"],
         index=0
     )
 
@@ -43,7 +53,7 @@ with col2:
         st.metric("Year", movie_info.get('year', 'N/A'))
         st.metric("Vote Average", f"{movie_info.get('vote_average', 0):.1f}/10")
 
-# Recommendations button
+# Recommendations
 if st.button("🚀 Get Recommendations", type="primary"):
     with st.spinner("Finding similar movies..."):
         recommendations = recommend_movies(selected_movie)
@@ -56,4 +66,4 @@ if st.button("🚀 Get Recommendations", type="primary"):
                 st.write(f"{i}. **{movie}**")
 
 with st.expander("📋 Preview Dataset"):
-    st.dataframe(df[['title', 'genres', 'vote_average']].head())
+    st.dataframe(df[['title', 'genres', 'vote_average']].head() if 'genres' in df.columns else df.head())
