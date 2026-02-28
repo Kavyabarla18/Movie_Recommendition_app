@@ -22,12 +22,10 @@ print(f"🔍 Looking for: {pkl_path}")  # Debug
 print(f"📁 Current dir contents: {os.listdir(current_dir)}")  # Shows if file exists
 
 try:
-    df = joblib.load(pkl_path)
-    print("✅ df_cleaned.pkl loaded successfully!")
-except FileNotFoundError as e:
-    print(f"❌ ERROR: {e}")
-    print("📋 Files in src/ folder:", os.listdir(current_dir))
-    raise e
+    df = joblib.load("src/df_cleaned.pkl")
+except FileNotFoundError:
+    st.error("❌ Missing src/df_cleaned.pkl - upload to GitHub!")
+    st.stop()
 
 
 def recommend_movies(movie_name, top_n=5):
