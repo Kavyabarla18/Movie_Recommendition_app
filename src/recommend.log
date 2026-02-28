@@ -1,0 +1,10 @@
+[2026-02-28 11:24:43,207] INFO - 🔁 Loading data...
+[2026-02-28 11:24:44,003] INFO - ✅ Data loaded successfully.
+[2026-02-28 11:33:21,031] INFO - 🎬 Recommending movies for: '20,000 Leagues Under the Sea'
+[2026-02-28 11:33:21,052] INFO - ✅ Top 5 recommendations ready.
+[2026-02-28 11:33:40,959] INFO - 🎬 Recommending movies for: '(500) Days of Summer'
+[2026-02-28 11:33:40,969] INFO - ✅ Top 5 recommendations ready.
+[2026-02-28 12:00:22,601] INFO - 🎬 Recommending movies for: 'Avengers: Age of Ultron'
+[2026-02-28 12:00:22,617] INFO - ✅ Top 5 recommendations ready.
+[2026-02-28 12:03:02,411] INFO - 🎬 Recommending movies for: '11:14'
+[2026-02-28 12:03:02,421] INFO - ✅ Top 5 recommendations ready.
