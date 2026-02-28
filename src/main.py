@@ -11,12 +11,12 @@ print(f"📁 Root contents: {os.listdir('.')}")
 print(f"📁 src/ contents: {os.listdir('src')}")
 
 try:
-    with open(config_path, 'r') as f:
+    with open("src/config.json", 'r') as f:
         config = json.load(f)
-    print("✅ config.json loaded!")
+    st.success("✅ config.json loaded!")
 except FileNotFoundError:
-    print("❌ Create src/config.json with: {\"movie_data\": \"df_cleaned.pkl\"}")
-    raise
+    st.error("❌ Create src/config.json")
+    st.stop()
 
 
 # OMDB api key
