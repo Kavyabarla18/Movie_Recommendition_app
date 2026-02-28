@@ -31,14 +31,16 @@ except FileNotFoundError:
 def recommend_movies(title):
     # Safe movie lookup
     movie_matches = df[df['title'].str.contains(title, case=False, na=False)]
-    if movie_matches.empty:
-        return [f"❌ '{title}' not found. Try: {df['title'].iloc[0]}"]
+  if st.button("Get Recommendations"):
+    recommendations = recommend_movies(selected_movie)
     
-    idx = movie_matches.index[0]
-    
-    # Cosine similarity (your existing code)
-    sim_scores = list(enumerate(cosine_sim[idx]))
-    movie_indices = sorted(sim_scores, key=lambda x: x[1], reverse=True)[1:11]
+     if not recommendations or recommendations == ["Movie not found in database!"]:
+        st.warning("❌ No recommendations. Try 'Inception', 'Titanic'")
+     else:
+        st.success(f"🎬 Top 10 movies like '{selected_movie}':")
+         for i, movie in enumerate(recommendations, 1):
+            st.write(f"{i}. {movie}")
+
     
     recommended_movies = []
     for i in movie_indices:
