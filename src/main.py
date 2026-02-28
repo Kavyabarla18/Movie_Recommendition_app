@@ -4,19 +4,19 @@ import streamlit as st
 from recommend import df, recommend_movies
 from omdb_utils import get_movie_details
 
+config_path = "src/config.json"
 
-current_dir = os.path.dirname(os.path.abspath(__file__))  # /mount/src/movie_recommendition_app/src/
-config_path = os.path.join(current_dir, "config.json")
-
-print(f"🔍 Looking for config: {config_path}")
-print(f"📁 src/ contents: {os.listdir(current_dir)}")
+print(f"🔍 Looking for: {config_path}")
+print(f"📁 Root contents: {os.listdir('.')}")  
+print(f"📁 src/ contents: {os.listdir('src')}")
 
 try:
-    config = json.load(open(config_path))
+    with open(config_path, 'r') as f:
+        config = json.load(f)
     print("✅ config.json loaded!")
-except FileNotFoundError as e:
-    print(f"❌ config.json missing!")
-    raise e
+except FileNotFoundError:
+    print("❌ Create src/config.json with: {\"movie_data\": \"df_cleaned.pkl\"}")
+    raise
 
 
 # OMDB api key
