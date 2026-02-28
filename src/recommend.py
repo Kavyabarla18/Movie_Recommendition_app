@@ -1,6 +1,7 @@
 # recommend.py
 import joblib
 import logging
+import streamlit as st
 
 # Setup logging
 logging.basicConfig(
