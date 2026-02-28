@@ -5,17 +5,11 @@ from recommend import df, recommend_movies
 from omdb_utils import get_movie_details
 
 config_path = "src/config.json"
-
-print(f"🔍 Looking for: {config_path}")
-print(f"📁 Root contents: {os.listdir('.')}")  
-print(f"📁 src/ contents: {os.listdir('src')}")
-
 try:
     with open("src/config.json", 'r') as f:
         config = json.load(f)
-    st.success("✅ config.json loaded!")
 except FileNotFoundError:
-    st.error("❌ Create src/config.json")
+    st.error("❌ Missing src/config.json - create it!")
     st.stop()
 
 
