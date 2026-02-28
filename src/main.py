@@ -23,14 +23,15 @@ if df.empty:
     st.error("❌ No data loaded. Check src/recommend.py")
     st.stop()
 
-# Debug: Show actual columns
+# Debug: Show actual columns FIRST
 st.sidebar.header("📊 Dataset Info")
 st.sidebar.write(f"**Shape:** {df.shape}")
 st.sidebar.write(f"**Columns:** {list(df.columns)}")
+st.sidebar.metric("Total Movies", len(df))
 
 # Safe column access
 title_col = 'title' if 'title' in df.columns else df.columns[0]
-st.sidebar.metric("Total Movies", len(df))
+st.sidebar.success("✅ Data ready!")
 
 # Main content
 col1, col2 = st.columns([2, 1])
@@ -49,8 +50,9 @@ with col2:
     movie_row = df[df[title_col] == selected_movie]
     if not movie_row.empty:
         movie_info = movie_row.iloc[0]
-        # Safe metrics - use first available numeric column
-        for col in df.select_dtypes(include=['number']).columns[:2]:
+        # Safe metrics - first 2 numeric columns
+        numeric_cols = df.select_dtypes(include=['number']).columns[:2]
+        for col in numeric_cols:
             st.metric(col.capitalize(), movie_info.get(col, 0))
 
 # Recommendations
@@ -65,11 +67,14 @@ if st.button("🚀 Get Recommendations", type="primary"):
             for i, movie in enumerate(recommendations, 1):
                 st.write(f"{i}. **{movie}**")
 
-# FIXED Preview - Safe columns only
+# FIXED Preview - SAFE column selection
 with st.expander("📋 Preview Dataset"):
-    available_cols = [col for col in ['title', 'genres', 'vote_average'] if col in df.columns]
+    # Only use columns that EXIST
+    safe_cols = ['title', 'genres', 'vote_average']
+    available_cols = [col for col in safe_cols if col in df.columns]
+    
     if available_cols:
         st.dataframe(df[available_cols].head())
     else:
-        st.dataframe(df.head())
-
+        # Show first 3 columns if movie columns missing
+        st.dataframe(df.iloc[:, :3].head())
