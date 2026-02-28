@@ -5,7 +5,19 @@ from recommend import df, recommend_movies
 from omdb_utils import get_movie_details
 
 
-config = json.load(open("config.json"))
+current_dir = os.path.dirname(os.path.abspath(__file__))  # /mount/src/movie_recommendition_app/src/
+config_path = os.path.join(current_dir, "config.json")
+
+print(f"🔍 Looking for config: {config_path}")
+print(f"📁 src/ contents: {os.listdir(current_dir)}")
+
+try:
+    config = json.load(open(config_path))
+    print("✅ config.json loaded!")
+except FileNotFoundError as e:
+    print(f"❌ config.json missing!")
+    raise e
+
 
 # OMDB api key
 OMDB_API_KEY = config["OMDB_API_KEY"]
