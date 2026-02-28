@@ -2,8 +2,12 @@ import joblib
 import logging
 import streamlit as st
 import os
+import pandas as pd
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
-# Setup logging (keep your original)
+# Setup logging (keep yours)
 logging.basicConfig(
     level=logging.INFO,
     format='[%(asctime)s] %(levelname)s - %(message)s',
@@ -19,19 +23,34 @@ pkl_path = os.path.join(current_dir, 'df_cleaned.pkl')
 
 try:
     df = joblib.load("src/df_cleaned.pkl")
-    cosine_sim = joblib.load("src/similarity.pkl")  # ADD THIS LINE
-except FileNotFoundError as e:
-    st.error(f"❌ Missing file: {e}")
+except FileNotFoundError:
+    st.error("❌ Missing src/df_cleaned.pkl")
     st.stop()
 
+# AUTO-GENERATE similarity.pkl if missing
+try:
+    cosine_sim = joblib.load("src/similarity.pkl")
+    st.success("✅ similarity.pkl loaded!")
+except FileNotFoundError:
+    st.info("⚙️ Generating similarity matrix...")
+    
+    # Create text features for cosine similarity (adjust column name)
+    df['features'] = df['overview'].fillna('') + ' ' + df['genres'].fillna('')
+    tfidf = TfidfVectorizer(stop_words='english', max_features=5000)
+    tfidf_matrix = tfidf.fit_transform(df['features'])
+    cosine_sim = cosine_similarity(tfidf_matrix)
+    
+    # Save for next time
+    joblib.dump(cosine_sim, "src/similarity.pkl")
+    st.success("✅ similarity.pkl generated & saved!")
+
 def recommend_movies(title):
-    # Safe movie lookup
     movie_matches = df[df['title'].str.contains(title, case=False, na=False)]
     if movie_matches.empty:
         return ["Movie not found - try exact title"]
     
     idx = movie_matches.index[0]
-    sim_scores = list(enumerate(cosine_sim[idx]))  # Now cosine_sim exists!
+    sim_scores = list(enumerate(cosine_sim[idx]))
     movie_indices = sorted(sim_scores, key=lambda x: x[1], reverse=True)[1:11]
     
     recommended_movies = []
@@ -39,5 +58,6 @@ def recommend_movies(title):
         recommended_movies.append(df.iloc[i[0]]['title'])
     
     return recommended_movies
+
 
 
