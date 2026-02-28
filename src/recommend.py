@@ -2,6 +2,7 @@
 import joblib
 import logging
 import streamlit as st
+import os
 
 # Setup logging
 logging.basicConfig(
@@ -14,12 +15,18 @@ logging.basicConfig(
 )
 
 logging.info("🔁 Loading data...")
+current_dir = os.path.dirname(os.path.abspath(__file__))  # /mount/src/movie_recommendition_app/src/
+pkl_path = os.path.join(current_dir, 'df_cleaned.pkl')
+
+print(f"🔍 Looking for: {pkl_path}")  # Debug
+print(f"📁 Current dir contents: {os.listdir(current_dir)}")  # Shows if file exists
+
 try:
-    df = joblib.load('df_cleaned.pkl')
-    cosine_sim = joblib.load('cosine_sim.pkl')
-    logging.info("✅ Data loaded successfully.")
-except Exception as e:
-    logging.error("❌ Failed to load required files: %s", str(e))
+    df = joblib.load(pkl_path)
+    print("✅ df_cleaned.pkl loaded successfully!")
+except FileNotFoundError as e:
+    print(f"❌ ERROR: {e}")
+    print("📋 Files in src/ folder:", os.listdir(current_dir))
     raise e
 
 
