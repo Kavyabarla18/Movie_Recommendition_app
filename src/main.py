@@ -1,51 +1,59 @@
-# app.py
-import json
 import streamlit as st
 from recommend import df, recommend_movies
-from omdb_utils import get_movie_details
+import json
 
-config_path = "src/config.json"
+# ✅ LINE 2: FIRST Streamlit command (NO imports/calls before this!)
+st.set_page_config(
+    page_title="Movie Recommender",
+    page_icon="🎬",
+    layout="wide"
+)
+
+# Load config AFTER set_page_config
 try:
     with open("src/config.json", 'r') as f:
         config = json.load(f)
 except FileNotFoundError:
-    st.error("❌ Missing src/config.json - create it!")
-    st.stop()
+    config = {"top_n": 10}
 
+st.title("🎬 Movie Recommendation System")
+st.markdown("---")
 
-# OMDB api key
-OMDB_API_KEY = config["OMDB_API_KEY"]
+# Sidebar
+st.sidebar.header("📊 Dataset Info")
+st.sidebar.metric("Total Movies", len(df))
+st.sidebar.metric("Features", df.shape[1])
 
-st.set_page_config(
-    page_title="Movie Recommender",
-    page_icon="🎬",
-    layout="centered"
-)
+# Main content
+col1, col2 = st.columns([2, 1])
 
-st.title("🎬 Movie Recommender")
+with col1:
+    st.header("🎯 Select Movie")
+    movies_list = df['title'].drop_duplicates().tolist()
+    selected_movie = st.selectbox(
+        "Choose a movie:",
+        options=movies_list[:1000],
+        index=0
+    )
 
-# Using 'title' instead of 'song' now
-movie_list = sorted(df['title'].dropna().unique())
-selected_movie = st.selectbox("🎬 Select a movie:", movie_list)
+with col2:
+    st.header("ℹ️ Movie Info")
+    if selected_movie in df['title'].values:
+        movie_info = df[df['title'] == selected_movie].iloc[0]
+        st.metric("Year", movie_info.get('year', 'N/A'))
+        st.metric("Vote Average", f"{movie_info.get('vote_average', 0):.1f}/10")
 
-if st.button("🚀 Recommend Similar Movies"):
+# Recommendations button
+if st.button("🚀 Get Recommendations", type="primary"):
     with st.spinner("Finding similar movies..."):
         recommendations = recommend_movies(selected_movie)
-        if recommendations is None or recommendations.empty:
-            st.warning("Sorry, no recommendations found.")
+        
+        if not recommendations or recommendations[0].startswith("❌"):
+            st.warning(recommendations[0])
         else:
-            st.success("Top similar movies:")
-            for _, row in recommendations.iterrows():
-                movie_title = row['title']
-                plot, poster = get_movie_details(movie_title, OMDB_API_KEY)
+            st.success(f"🎬 Top movies like '{selected_movie}':")
+            for i, movie in enumerate(recommendations, 1):
+                st.write(f"{i}. **{movie}**")
 
-                with st.container():
-                    col1, col2 = st.columns([1, 3])
-                    with col1:
-                        if poster != "N/A":
-                            st.image(poster, width=100)
-                        else:
-                            st.write("❌ No Poster Found")
-                    with col2:
-                        st.markdown(f"### {movie_title}")
-                        st.markdown(f"*{plot}*" if plot != "N/A" else "_Plot not available_")
+with st.expander("📋 Preview Dataset"):
+    st.dataframe(df[['title', 'genres', 'vote_average']].head())
